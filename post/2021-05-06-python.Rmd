@@ -1,0 +1,44 @@
+---
+title: "Introduction to Python"
+author: "Christine Do"
+date: "2021-05-1T21:13:14-05:00"
+categories: R
+tags:
+- R Markdown
+- plot
+- regression
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+```
+
+During the majority of my computational biology class, we worked on R studio. However, the final week of classes we were introduced to Python. Python is a very useful programming language that can be used to solve, collect, and interpret problems and data. 
+
+In the example below, I am telling the computer to store "c" as "HI! This is python". Then, I am telling the computer to print what is "c" is. As you can see, the computer then prints the phrase that was stored as "c", which is "HI! This is python."
+```{python}
+c = "HI! This is python" 
+print(c)
+```
+
+Another really cool thing you can do with both Python and R studio is incorporate both programming languages together. First, I am going to use R studio to store the phrase "My name is" into a variable called "a". 
+
+```{R}
+library(reticulate)
+a <- "My name is"
+```
+
+Then, using python, I am going to store my name, "Christine" into another variable called "b." Using the print function, I will be able to incorporate both languages to display a phrase using just the variables a and b. 
+
+```{python}
+b = " Christine" 
+print(r.a +b)
+```
+
+As you can see, even though one part of the phrase was written in one language and the other half was written in another lanuage, the two languages were join together seemlessly. 
+
+Well that is it for now! I hope you enjoyed my little introduction to python! :) 
+
+For now... enjoy this cute picture of a panda I found on the internet!! 
+
+![](https://i.pinimg.com/originals/ca/20/61/ca2061c17d6f4a32978dd541bafed0e4.jpg)

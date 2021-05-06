@@ -16,5 +16,15 @@
       <description>Hi! My name is Christine Do and I am a 4th year Biology major with a Business Minor.</description>
     </item>
     
+    <item>
+      <title>Introduction to Python</title>
+      <link>/post/1/01/01/introduction-to-python/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/post/1/01/01/introduction-to-python/</guid>
+      <description>During the majority of my computational biology class, we worked on R studio. However, the final week of classes we were introduced to Python. Python is a very useful programming language that can be used to solve, collect, and interpret problems and data.
+In the example below, I am telling the computer to store “c” as “HI! This is python”. Then, I am telling the computer to print what is “c” is.</description>
+    </item>
+    
   </channel>
 </rss>
