@@ -5,15 +5,14 @@
     <link>/post/</link>
     <description>Recent content in Posts on Christine Do</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-US</language>
-    <lastBuildDate>Thu, 23 Jul 2015 21:13:14 -0500</lastBuildDate><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    <language>en-US</language><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Hi!</title>
-      <link>/post/2015/07/23/hi/</link>
-      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
+      <link>/post/1/01/01/hi/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/post/2015/07/23/hi/</guid>
-      <description>Hi! My name is Christine Do and I am a 4th year Biology major with a Business Minor.</description>
+      <guid>/post/1/01/01/hi/</guid>
+      <description>Hi! My name is Christine Do and I am a 4th year Biology major with a Business Minor. This is a website that I created for my computational biology class! It includes a some projects I did, my resume, and my email for you to contact me! :)</description>
     </item>
     
     <item>

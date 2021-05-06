@@ -1,7 +1,7 @@
 ---
 title: "Hi!"
 author: "Christine Do"
-date: 2015-07-23T21:13:14-05:00
+date: 2021-05-013T21:13:14-05:00
 categories: ["R"]
 tags: ["R Markdown", "plot", "regression"]
 ---
@@ -10,4 +10,8 @@ tags: ["R Markdown", "plot", "regression"]
 knitr::opts_chunk$set(collapse = TRUE)
 ```
 
-Hi! My name is Christine Do and I am a 4th year Biology major with a Business Minor. 
+Hi! My name is Christine Do and I am a 4th year Biology major with a Business Minor. This is a website that I created for my computational biology class! It includes a some projects I did, my resume, and my email for you to contact me! :) 
+
+
+
+
