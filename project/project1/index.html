@@ -7,7 +7,7 @@
     <meta name="author" content="Christine Do" />
     
     <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
-    <title>Project 1</title>
+    <title>Project 1: Exploratory Data Analysis</title>
     <meta name="generator" content="Hugo 0.83.1" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="../../css/main.css" />
@@ -54,13 +54,13 @@
       <div class="container">
         <div class="blog-post">
           <h3>
-            <strong><a href="../../project/project1/">Project 1</a></strong>
+            <strong><a href="../../project/project1/">Project 1: Exploratory Data Analysis</a></strong>
           </h3>
         </div>
  
 <div class="blog-title">
           <h4>
-         December 1, 2020 
+         January 1, 0001 
             &nbsp;&nbsp;
             
           </h4>
@@ -72,8 +72,167 @@
               
 
 
-<div id="test-project-1" class="section level2">
-<h2>Test Project 1</h2>
+<div id="introduction-5-pts" class="section level4">
+<h4>0. Introduction (5 pts)</h4>
+<p>The first data set is the World Happiness Report, which contains the data from a landmark survey. The data ranks 155 countries by their happiness score. The data also contains information regarding how the economy (GDP per Capita), family, health (life expectancy), freedom, and other factors contribute to the happiness score. The second data set contains a list of countries, the region/continent in which the country is located in, and the countries population. Both of these datasets were acquired through the site Kaggle. I found the the Happiness datasets interesting because I didn’t know that happiness levels and scores was of the various countries was something that researched and examined by the United Nations. I was interested to see if there was a relationship between which continent had the happiest countries; therefore, the second data set was chosen to determine if a relationship exists.</p>
+<p>Below are previews of both data set</p>
+<pre class="r"><code>library(tidyverse)
+happy &lt;- read_csv(&quot;~/2018.csv&quot;)
+countries &lt;- read_csv(&quot;~/countries.csv&quot;)
+head(happy)</code></pre>
+<pre><code>## # A tibble: 6 x 8
+##   `Overall rank` `Country or reg… Score `GDP per capita` `Social support`
+##            &lt;dbl&gt; &lt;chr&gt;            &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1              1 Finland           7.63             1.30             1.59
+## 2              2 Norway            7.59             1.46             1.58
+## 3              3 Denmark           7.56             1.35             1.59
+## 4              4 Iceland           7.50             1.34             1.64
+## 5              5 Switzerland       7.49             1.42             1.55
+## 6              6 Netherlands       7.44             1.36             1.49
+## # … with 3 more variables: `Healthy life expectancy` &lt;dbl&gt;, `Freedom to make
+## #   life choices` &lt;dbl&gt;, Generosity &lt;dbl&gt;</code></pre>
+<pre class="r"><code>head(countries)</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   Country      Region Population
+##   &lt;chr&gt;        &lt;chr&gt;       &lt;dbl&gt;
+## 1 Angola       AFRICA   12127071
+## 2 Benin        AFRICA    7862944
+## 3 Botswana     AFRICA    1639833
+## 4 Burkina Faso AFRICA   13902972
+## 5 Burundi      AFRICA    8090068
+## 6 Cameroon     AFRICA   17340702</code></pre>
+<pre class="r"><code>project &lt;- happy %&gt;% left_join(countries, by = c(`Country or region` = &quot;Country&quot;)) %&gt;% 
+    select(-&quot;Overall rank&quot;) %&gt;% rename(Freedom = &quot;Freedom to make life choices&quot;) %&gt;% 
+    rename(GDP = &quot;GDP per capita&quot;) %&gt;% rename(Social = &quot;Social support&quot;) %&gt;% 
+    rename(Life = &quot;Healthy life expectancy&quot;)</code></pre>
+</div>
+<div id="tidying-rearranging-widelong-10-pts" class="section level4">
+<h4>1. Tidying: Rearranging Wide/Long (10 pts)</h4>
+<pre class="r"><code>options(scipen = 999)
+project %&gt;% select(-&quot;Country or region&quot;) %&gt;% select(-&quot;Region&quot;) %&gt;% 
+    summarise_all(list(Min = min, Mean = mean, Max = max, Sd = sd, 
+        Median = median), na.rm = T) %&gt;% pivot_longer(contains(&quot;_&quot;)) %&gt;% 
+    arrange(name) %&gt;% separate(name, into = c(&quot;Numeric&quot;, &quot;Statistics&quot;)) %&gt;% 
+    pivot_wider(names_from = &quot;Statistics&quot;, values_from = &quot;value&quot;)</code></pre>
+<pre><code>## # A tibble: 7 x 6
+##   Numeric        Max         Mean       Median       Min      Sd
+##   &lt;chr&gt;        &lt;dbl&gt;        &lt;dbl&gt;        &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+## 1 Freedom    7.24e-1        0.455        0.487      0    1.62e-1
+## 2 GDP        2.10e+0        0.891        0.950      0    3.92e-1
+## 3 Generosity 5.98e-1        0.181        0.174      0    9.85e-2
+## 4 Life       1.03e+0        0.597        0.644      0    2.48e-1
+## 5 Population 1.31e+9 43513573.    10205234.    287730    1.46e+8
+## 6 Score      7.63e+0        5.38         5.38       2.90 1.12e+0
+## 7 Social     1.64e+0        1.21         1.25       0    3.02e-1</code></pre>
+<p>The data was tidy prior to the start of the project; therefore, the pivot_longer and pivot_wider functions were used to rearrange the summary statistics. After creating the summary statistics, the results of each statistic was listed as a wide table. Using the “pivot_longer” function, each column that contained "_" in the column name was then taken and place in a column together, called “name.” Afterwards, the name column was separated into two columns, with the original column names in one and the statistics into another. Last, using “pivot_wider,” each of the statistics were separated into columns.</p>
+</div>
+<div id="joiningmerging-10-pts" class="section level4">
+<h4>2. Joining/Merging (10 pts)</h4>
+<pre class="r"><code>project &lt;- happy %&gt;% left_join(countries, by = c(`Country or region` = &quot;Country&quot;)) %&gt;% 
+    select(-&quot;Overall rank&quot;) %&gt;% rename(Freedom = &quot;Freedom to make life choices&quot;) %&gt;% 
+    rename(GDP = &quot;GDP per capita&quot;) %&gt;% rename(Social = &quot;Social support&quot;) %&gt;% 
+    rename(Life = &quot;Healthy life expectancy&quot;)</code></pre>
+<p>Using left join, I combined the values from the countries datas et to the values in the happy data set. Left join was used because I wanted to keep all the values from the happy data set and only add the countries from the countries data set that matched the countries already present on the happy data set. Prior to joining the data sets, 156 observations were in the happy data set and 277 observations were in the countries data set. Since left join was used, the final data set has the same number of observations from the happy data set (156 observations); however, 121 observations were dropped from the countries data set. A potential problem that could have occurred is some of the values from the happy data set may not have a population or region listed for them because they did not have the exact same name on the countries data set.</p>
+</div>
+<div id="wrangling-40-pts" class="section level4">
+<h4>3. Wrangling (40 pts)</h4>
+<pre class="r"><code>options(scipen = 999)
+project %&gt;% select(-&quot;Country or region&quot;) %&gt;% select(-&quot;Region&quot;) %&gt;% 
+    summarise_all(list(Min = min, Mean = mean, Max = max, Sd = sd, 
+        Median = median), na.rm = T) %&gt;% pivot_longer(contains(&quot;_&quot;)) %&gt;% 
+    arrange(name) %&gt;% separate(name, into = c(&quot;Numeric&quot;, &quot;Statistics&quot;)) %&gt;% 
+    pivot_wider(names_from = &quot;Statistics&quot;, values_from = &quot;value&quot;) %&gt;% 
+    rename(`Standard Deviation` = &quot;Sd&quot;, Data = &quot;Numeric&quot;) %&gt;% 
+    mutate(Range = Max - Min)</code></pre>
+<pre><code>## # A tibble: 7 x 7
+##   Data          Max        Mean      Median      Min `Standard Deviatio…   Range
+##   &lt;chr&gt;       &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt;               &lt;dbl&gt;   &lt;dbl&gt;
+## 1 Freedom   7.24e-1     4.55e-1     4.87e-1   0.                  0.162  7.24e-1
+## 2 GDP       2.10e+0     8.91e-1     9.49e-1   0.                  0.392  2.10e+0
+## 3 Generosi… 5.98e-1     1.81e-1     1.74e-1   0.                  0.0985 5.98e-1
+## 4 Life      1.03e+0     5.97e-1     6.44e-1   0.                  0.248  1.03e+0
+## 5 Populati… 1.31e+9     4.35e+7     1.02e+7   2.88e5      145962600.     1.31e+9
+## 6 Score     7.63e+0     5.38e+0     5.38e+0   2.90e0              1.12   4.73e+0
+## 7 Social    1.64e+0     1.21e+0     1.25e+0   0.                  0.302  1.64e+0</code></pre>
+<pre class="r"><code>project %&gt;% select(-&quot;Country or region&quot;) %&gt;% group_by(Region) %&gt;% 
+    summarise_all(list(Min = min, Mean = mean, Max = max, SD = sd, 
+        Median = median), na.rm = T) %&gt;% pivot_longer(contains(&quot;_&quot;)) %&gt;% 
+    arrange(Region, name) %&gt;% pivot_wider(names_from = &quot;name&quot;, 
+    values_from = &quot;value&quot;) %&gt;% filter(!is.na(Region))</code></pre>
+<pre><code>## # A tibble: 7 x 36
+##   Region Freedom_Max Freedom_Mean Freedom_Median Freedom_Min Freedom_SD GDP_Max
+##   &lt;chr&gt;        &lt;dbl&gt;        &lt;dbl&gt;          &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;
+## 1 AFRICA       0.674        0.389          0.428       0         0.165     1.09
+## 2 ASIA         0.724        0.502          0.539       0.085     0.148     1.53
+## 3 EUROPE       0.686        0.473          0.492       0.131     0.160     1.58
+## 4 LATIN        0.632        0.505          0.548       0.025     0.150     1.22
+## 5 NEAR_…       0.654        0.422          0.468       0.088     0.162     2.10
+## 6 NORTH…       0.653        0.6            0.6         0.547     0.0750    1.40
+## 7 OCEAN…       0.669        0.658          0.658       0.647     0.0156    1.34
+## # … with 29 more variables: GDP_Mean &lt;dbl&gt;, GDP_Median &lt;dbl&gt;, GDP_Min &lt;dbl&gt;,
+## #   GDP_SD &lt;dbl&gt;, Generosity_Max &lt;dbl&gt;, Generosity_Mean &lt;dbl&gt;,
+## #   Generosity_Median &lt;dbl&gt;, Generosity_Min &lt;dbl&gt;, Generosity_SD &lt;dbl&gt;,
+## #   Life_Max &lt;dbl&gt;, Life_Mean &lt;dbl&gt;, Life_Median &lt;dbl&gt;, Life_Min &lt;dbl&gt;,
+## #   Life_SD &lt;dbl&gt;, Population_Max &lt;dbl&gt;, Population_Mean &lt;dbl&gt;,
+## #   Population_Median &lt;dbl&gt;, Population_Min &lt;dbl&gt;, Population_SD &lt;dbl&gt;,
+## #   Score_Max &lt;dbl&gt;, Score_Mean &lt;dbl&gt;, Score_Median &lt;dbl&gt;, Score_Min &lt;dbl&gt;,
+## #   Score_SD &lt;dbl&gt;, Social_Max &lt;dbl&gt;, Social_Mean &lt;dbl&gt;, Social_Median &lt;dbl&gt;,
+## #   Social_Min &lt;dbl&gt;, Social_SD &lt;dbl&gt;</code></pre>
+<p>In the first table created, the statistics (maximum, minimum, median, mean, and standard deviation) of each numerical variable was calculated. This was achieved by using the “summarize all” function. Afterwards, a combination of the pivot functions were used to organize the results in a neat table that each of the statistics as the variables and each of the numerical categories were the observations. In addition, a new variable called “Range” was calculated for by subtracting the minimum value from the maximum value. The freedom (freedom to make life choices) variable had a maximum value of 0.724, mean value of 0.455, median value of 0.487, minimum value of 0., standard deviation of 0.162, and range of 0.724.The GDP variable had a maximum value of 2.10, mean value of 0.891, median value of 0.949, minimum value of 0., standard deviation of 0.392, and range of 2.10.The generosity variable had a maximum value of 0.598, mean value of 0.181, median value of 0.174, minimum value of 0., standard deviation of 0.0985, and range of 0.598.The life (healthy life expectancy) variable had a maximum value of 1.03, mean value of 0.597, median value of 0.644, minimum value of 0., standard deviation of 0.248, and range of 1.03. The social (social support) variable had a maximum value of 1.64, mean value of 1.21, median value of 1.25, minimum value of 0., standard deviation of 0.302, and range of 1.64.</p>
+<p>In the second table, the statistics (maximum, minimum, median, mean, and standard deviation) of each numerical variable was calculated based on the region the country was located in. The region with the greatest average population was North America with 165771574 people, while the region with the smallest average population was the Oceania region with 12170111 people. The Oceania region also had the highest average in the life variable of 0.893, which is associated with life expectancy. While Africa has the lowest average in the life variable with a value of 0.320.</p>
+</div>
+<div id="visualizing-30-pts" class="section level4">
+<h4>4. Visualizing (30 pts)</h4>
+<pre class="r"><code>project %&gt;% select_if(is.numeric) %&gt;% cor(use = &quot;complete.obs&quot;) %&gt;% 
+    as.data.frame %&gt;% rownames_to_column %&gt;% pivot_longer(-1) %&gt;% 
+    ggplot(aes(rowname, name, fill = value)) + geom_tile() + 
+    geom_text(aes(label = round(value, 2))) + xlab(&quot;&quot;) + ylab(&quot;&quot;) + 
+    coord_fixed() + scale_fill_gradient2(low = &quot;blue&quot;, mid = &quot;white&quot;, 
+    high = &quot;light pink&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>project %&gt;% filter(!is.na(Region)) %&gt;% filter(Population &lt; 50000000) %&gt;% 
+    ggplot(aes(Score, Population, color = Region)) + geom_point(size = 2) + 
+    theme_light() + xlab(&quot;Happiness Score&quot;) + ylab(&quot;Population&quot;) + 
+    scale_y_continuous(breaks = seq(0, 50000000, 5000000)) + 
+    ggtitle(&quot;Population vs. Happiness Score&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-4-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>project %&gt;% filter(!is.na(Region)) %&gt;% ggplot(aes(Region, Score)) + 
+    geom_bar(stat = &quot;summary&quot;, fun = &quot;mean&quot;, aes(fill = Region)) + 
+    scale_y_continuous(&quot;Happiness Score&quot;, breaks = seq(0, 8, 
+        1)) + xlab(&quot;Region&quot;) + coord_flip() + scale_fill_brewer(palette = &quot;Pastel2&quot;) + 
+    theme(legend.position = &quot;none&quot;) + ggtitle(&quot;Average Happiness Score Across Regions&quot;)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-4-3.png" width="672" style="display: block; margin: auto;" />
+A heat map to created to observe the correlation between the various numerical variables. From this heat map, it can be seen that the majority of the positive correlation. Population size and GDP appear to have no correlation with each other, due to the observed correlation value of 0. In addition, it appears that population &amp; generosity, happiness score &amp; population size, and social support &amp; population size are the variables that are negatively correlated with correlation values less than 0. In addition to the heat map, two addition graphs were made: Population vs. Happiness Score plot and the Average Happiness Score Across Regions.</p>
+<p>In the Population vs. Happiness Score plot, the population of each of the countries was plotted in relation to their happiness scores. In addition, each of the countries were color coded by the region they are located in. With this in mind, it appears that most of the countries have a population size that is less than 25,000,000. It also appears that the countries located in Africa on average have the a smaller population size and lower happiness scores. In addition, even though the Oceania region appear to have the have higher happiness scores, their population sizes are similar to the countries in Africa.</p>
+<p>In the Average Happiness Score Across Regions graph, the happiness score was averaged across each of the regions and plotted on a bar graph. From this graph, it appears that the Oceania region had the highest average happiness score, while Africa had the lowest average happiness score. From this graph, the regions can be ranked based on their average happiness score (from highest to lowest: 1. Oceania, 2. Northern America, 3. Europe, 4. Latin, 5. Near East, 6. Asia, 7. Africa).</p>
+</div>
+<div id="dimensionality-reduction-30-pts" class="section level4">
+<h4>5. Dimensionality Reduction (30 pts)</h4>
+<pre class="r"><code>library(cluster)
+library(GGally)
+pam_dat &lt;- project %&gt;% rename(Country = &quot;Country or region&quot;) %&gt;% 
+    select(-Country, -Region)
+
+sil_width &lt;- vector()
+for (i in 2:10) {
+    pam_fit &lt;- pam(pam_dat, k = i)
+    sil_width[i] &lt;- pam_fit$silinfo$avg.width
+}
+ggplot() + geom_line(aes(x = 1:10, y = sil_width)) + scale_x_continuous(name = &quot;k&quot;, 
+    breaks = 1:10)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pam1 &lt;- project %&gt;% pam(k = 2)
+
+plot(pam1, which = 2)</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>project %&gt;% mutate(cluster = as.factor(pam1$clustering)) %&gt;% 
+    ggpairs(columns = c(&quot;Score&quot;, &quot;GDP&quot;, &quot;Social&quot;, &quot;Life&quot;, &quot;Freedom&quot;, 
+        &quot;Generosity&quot;, &quot;Population&quot;), aes(color = cluster))</code></pre>
+<p><img src="../../project/project1_files/figure-html/unnamed-chunk-5-3.png" width="672" style="display: block; margin: auto;" />
+Lastly, clustering and PCA was observed. Using silhouette widths, the numbers of clusters was determined to be 2 because k=2 had the greatest silhouette width. The silhouette widths were also plotted, where the average silhouette width was determined to be 0.02. However, it is important to note that the data set lacks substantial structure because the average silhouette width is very low (0.02). The cluster was then visualized with ggplot2. From the cluster plot, it appears that the greater happiness score (red) is associated with greater values in the other variables as well (GDP, Social, Life, Freedom, Generosity, and Population). In addition, it appears that regardless of the population sizes, freedom and generosity is relatively similar between the two clusters.</p>
+</div>
+<div id="neatness-holisticdiscretionary-points-5-pts" class="section level4">
+<h4>6. Neatness, Holistic/Discretionary Points (5 pts)</h4>
 </div>
 
             

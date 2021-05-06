@@ -6,34 +6,32 @@
     <description>Recent content on Christine Do</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-US</language>
-    <lastBuildDate>Tue, 01 Dec 2020 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 23 Jul 2015 21:13:14 -0500</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Project 1</title>
-      <link>/project/project1/</link>
-      <pubDate>Tue, 01 Dec 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/project/project1/</guid>
-      <description> Test Project 1  </description>
-    </item>
-    
-    <item>
-      <title>Project 2</title>
-      <link>/project/project2/</link>
-      <pubDate>Tue, 01 Dec 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/project/project2/</guid>
-      <description> Test Project 2  </description>
-    </item>
-    
-    <item>
-      <title>Hello R Markdown</title>
-      <link>/post/2015/07/23/hello-r-markdown/</link>
+      <title>Hi!</title>
+      <link>/post/2015/07/23/hi/</link>
       <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
       
-      <guid>/post/2015/07/23/hello-r-markdown/</guid>
-      <description>R Markdown This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
-You can embed an R code chunk like this:
-summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.98 ## 3rd Qu.</description>
+      <guid>/post/2015/07/23/hi/</guid>
+      <description>Hi! My name is Christine Do and I am a 4th year Biology major with a Business Minor.</description>
+    </item>
+    
+    <item>
+      <title>Project 1: Exploratory Data Analysis</title>
+      <link>/project/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project1/</guid>
+      <description>0. Introduction (5 pts) The first data set is the World Happiness Report, which contains the data from a landmark survey. The data ranks 155 countries by their happiness score. The data also contains information regarding how the economy (GDP per Capita), family, health (life expectancy), freedom, and other factors contribute to the happiness score. The second data set contains a list of countries, the region/continent in which the country is located in, and the countries population.</description>
+    </item>
+    
+    <item>
+      <title>Project 2: Modeling, Testing, and Predicting</title>
+      <link>/project/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>0. Introduction (5 pts) library(tidyverse) acnh &amp;lt;- read_csv(&amp;quot;~/acnh.csv&amp;quot;) acnh &amp;lt;- acnh %&amp;gt;% rename(&amp;quot;Seasonal_Avail&amp;quot;= &amp;quot;Seasonal Availability&amp;quot;) #acnh$item &amp;lt;- paste(acnh$Name, acnh$Variation, sep=&amp;quot;_&amp;quot;) nrow(acnh) ## [1] 913 The data set contains the 913 (observations) clothing items in Animal Crossing New Horizons (ACNH) game.For each clothing item, it contains the purchase and selling price in bells. The data set also contains information whether the clothing item is a craftable DIY. It also contains where and when the item can be obtained in the game, which is labeled in the Source and Seasonal_Avail column.</description>
     </item>
     
     <item>

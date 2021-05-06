@@ -1,8 +1,269 @@
 ---
-title: "Project 2"
-author: "Me"
-date: "2020-12-01"
-output: html_document
+title: 'Project 2: Modeling, Testing, and Predicting'
+author: "SDS348"
+date: ''
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
 ---
 
-## Test Project 2
+```{r setup, include=FALSE}
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE,fig.align="center",warning=FALSE,message=FALSE,fig.width=8, fig.height=5, linewidth=60)
+options(tibble.width = 100,width = 100)
+library(tidyverse)
+```
+
+## 0. Introduction (5 pts)
+
+```{R}
+library(tidyverse)
+acnh <- read_csv("~/acnh.csv")
+acnh <- acnh %>% rename("Seasonal_Avail"= "Seasonal Availability")
+#acnh$item <- paste(acnh$Name, acnh$Variation, sep="_")
+nrow(acnh)
+```
+
+The data set contains the 913 (observations) clothing items in Animal Crossing New Horizons (ACNH) game.For each clothing item, it contains the purchase and selling price in bells. The data set also contains information whether the clothing item is a craftable DIY. It also contains where and when the item can be obtained in the game, which is labeled in the Source and Seasonal_Avail column.It also contains which style the clothing time falls under whether it is active, cool, cute, elegant, gorgeous, or simple. 
+
+## 1. MANOVA (15 pts)
+
+```{R}
+man <- manova(cbind(Buy, Sell)~Style,data=acnh)
+summary(man, tol=0)
+
+summary(aov(Buy~Style,data=acnh))
+summary(aov(Sell~Style,data=acnh))
+
+pairwise.t.test(acnh$Buy,acnh$Style, p.adj="none")
+pairwise.t.test(acnh$Sell,acnh$Style, p.adj="none")
+
+1-0.95^5
+0.05/5
+```
+
+A MANOVA test was used to determine if whether the numeric variables (Buy & Sell) show a mean difference across the different groups of clothing styles. It was concluded that there is a significant mean difference between the groups of styles due to the critical value of less that 0.01. Afterwards univarate ANOVAS were performed to determine that all the responses show a mean difference across the groups. A post-hoc t test was also used to determine with groups differed. The post hoc test the purchase price was significant for all the groups besides Active & Cool, Active & Cute, Cute & Cool, and Cool & Elegant. The post hoc test for the selling price was significant for Active & Gorgeous, Cute & Gorgeous, Elegant & Gorgeous, and Gorgeous & Simple. A total of 5 tests were performed, the probability of at least one type 1 error is 0.226; therefore, a significant level of 0.01 should be used to keep the overall type I error rate at 0.05. 
+
+The MANOVA test assumptions include: a random sample with independent observations, the dependent variables have multivariate normality, homogeneity of within-group covariance matrices, linear relationship among dependent variable, no extreme univariate or multivariate outliers, no multicollinearity. The data likely met the multivariate normality assumption. However, the data had outliers, therefore, failed to meet the assumption that no outliers were present. 
+
+## 2. Randomization Test (10 pts)
+
+```{R}
+acnh_ran <- acnh %>% select(DIY, Sell) %>%  as.data.frame()
+t.test(Sell~DIY,data = acnh_ran)
+
+rand_dist<-vector()
+for(i in 1:5000){
+new<-data.frame(Sell=sample(acnh_ran$Sell),DIY=acnh_ran$DIY) 
+rand_dist[i]<-mean(new[new$DIY=="Yes",]$Sell)-
+              mean(new[new$DIY=="No",]$Sell)}
+acnh_ran %>% group_by(DIY) %>% summarise(S=mean(Sell)) %>% summarize(diff(S))
+
+{hist(rand_dist); abline(v=c(-7171.101, 7171.101), col='red')}
+
+#p-value 
+mean(rand_dist > 7171.101)*2 
+
+```
+A mean difference randomization test was performed to determine whether or not the selling price of the clothing items differ depending on if they are DIY items or non-DIY items. 
+
+Null Hypothesis: The selling price is the same for DIYs and non-DIYs clothing items. 
+
+Alternative Hypothesis: The selling price is different for the DIYs and non-DIYs clothing items. 
+
+After performing the test, the p-value was determined to be 0. From the p-value, it is determined that there is significant difference in the selling price between DIY and non-DIY clothing items. 
+
+## 3. Linear Regression (40 pts)
+
+```{R}
+library(lmtest); library(sandwich)
+
+acnh$Buy_c <- acnh$Buy - mean(acnh$Buy, na.rm = T)
+acnh$Sell_c <- acnh$Sell - mean(acnh$Sell, na.rm = T)
+lm <- lm(Sell_c~Buy_c*Style, data=acnh)
+summary(lm)
+
+acnh %>% select(Sell, Buy, Style) %>% na.omit %>% ggplot(aes(Buy, Sell, color=Style)) + 
+geom_point(aes(color=Style))+geom_smooth(method="lm") 
+
+resids <- lm$residuals
+fitvalues <-lm$fitted.values
+ggplot() + geom_point(aes(fitvalues, resids)) + geom_hline(yintercept = 0, color = "red")
+ggplot() + geom_qq(aes(sample = resids))+ geom_qq_line(aes(sample=resids))
+shapiro.test(resids) #Ho: true distribution ir normal 
+bptest(lm) #Ho: homoskedatic
+coeftest(lm, vcov=vcovHC(lm))
+
+#proportion of variance 
+summary(lm)$r.sq
+
+```
+
+A Linear regression model was use to predict the selling price from the purchase/buy price and the style of the clothing item. Prior to creating the model, the numeric variables (selling and purchase price) were centered around their means. 
+
+From the coefficients, for every 1 unit increase in purchase price, the selling price by 0.25 units. If the item is a Cool style, then the selling price will increase by 0.026 units. If the item is a Cute style, then the selling price will increase by 0.011 units. If the item is a Elegant style, then the selling price will increase by 0.012 units. If the item is a Gorgeous style, then the selling price will increase by 0.026 units. If the item is a Simple style, then the selling price will increase by 0.11 units. 
+
+0.99 of the variation in the outcome can be explain from the model. In addition, the assumptions for linear regression for check graphically and using hypothesis tests. The data failed the normality test with a p-value less than 0.05 for the Shapiro-Wilk test.The data had a p-value less than 0.05 for the Breusch-Pagan test and failed to reject the null hypothesis of homoskedatic. 
+
+Afterward, the regression results was computed with robust standard errors. From these results, it appears that Style Cool and Gorgeous are significant after the robust model. 
+
+## 4. Linear Regression with Interaction (5 pts)
+
+```{R}
+boot_dat<- sample_frac(acnh, replace=T)
+
+samp_distn<-replicate(5000, {  
+  boot_dat <- sample_frac(acnh, replace=T)  
+  fit <- lm(Sell_c~Buy_c*Style, data=boot_dat)  
+  coef(fit) 
+  }) 
+samp_distn %>% t %>% as.data.frame %>% summarize_all(sd)
+
+```
+
+When comparing the bootstrapped standard errors values to the original standard error and robust error, the bootstrapped values had lower values for Buy and all the styles. 
+
+
+## 5. Logistic Regression (30 pts)
+
+```{R}
+class_diag <- function(probs,truth){ 
+  #CONFUSION MATRIX: CALCULATE ACCURACY, TPR, TNR, PPV 
+  if(is.character(truth)==TRUE) truth<-as.factor(truth) 
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1 
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),factor(truth, levels=c(0,1))) 
+  acc=sum(diag(tab))/sum(tab) 
+  sens=tab[2,2]/colSums(tab)[2] 
+  spec=tab[1,1]/colSums(tab)[1] 
+  ppv=tab[2,2]/rowSums(tab)[2] 
+  
+#CALCULATE EXACT AUC 
+  ord<-order(probs, decreasing=TRUE) 
+  probs <- probs[ord]; truth <- truth[ord] 
+  TPR=cumsum(truth)/max(1,sum(truth))  
+  FPR=cumsum(!truth)/max(1,sum(!truth)) 
+  dup <-c(probs[-1]>=probs[-length(probs)], FALSE) 
+  TPR <-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1) 
+  n <- length(TPR) 
+  auc <- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n])) 
+  data.frame(acc,sens,spec,ppv,auc) 
+}
+
+
+acnh_data<-acnh%>%mutate(y=ifelse(DIY=="Yes",1,0))
+acnh_fit<-glm(y~Seasonal_Avail+Style,data = acnh_data, family = binomial(link="logit"))
+summary(acnh_fit)
+exp(coef(acnh_fit))
+
+prob <- predict(acnh_fit,type="response")
+table(predict=as.numeric(prob>0.5), truth=acnh_data$y) %>% addmargins
+class_diag(prob,acnh_data$y)
+
+acnh_data$logpred<-predict(acnh_fit, type="link")
+acnh_data%>%ggplot()+geom_density(aes(logpred,color=DIY,fill=DIY), alpha=.4) +
+  theme(legend.position=c(.5,.5))+geom_vline(xintercept=0)+ggtitle("Density Plot of Predicted DIY")+xlab("predictor (logit)")
+
+library(plotROC)
+ROCplot <- ggplot(acnh_fit) + geom_roc(aes(d = y, m = prob), 
+    n.cuts = 0)
+ROCplot
+calc_auc(ROCplot)
+
+```
+A logistic regression was performed to predict if an clothing item is a DIY or not from the season that it is available in and the style it is considered. From the coefficients, it was determined that if an item was available in the summer, then the odds of it being a DIY increased by 0.0000000289. If an item was available during the winter, then the odds of it being a DIY increased by 0.000000031. If an item was considered Cool, then the odds of it being a DIY increased by 0.718.If an item was considered Cute, then the odds of it being a DIY increased by 0.989. If an item was considered Elegant, then the odds of it being a DIY increased by 0.0000000169. If an item was considered Gorgeous, then the odds of it being a DIY increased by 0.727. If an item was considered Simple, then the odds of it being a DIY increased by 0.00000001646632. 
+
+The accuracy of the model is 0.985, sensitivity is 0 specificity is 1, and AUC is 0.776. Therefore, it can be concluded that the model is fair at predicting whether the clothing item is a DIY.
+
+
+## 6. Logistic Regression Predicting Binary Response Variables (25 pts)
+
+```{R}
+library(glmnet)
+acnh_data <- acnh_data %>% select(-Buy_c, -Sell_c) %>% rename("Mannequin"="Mannequin Piece") %>% rename("Shape"= "Primary Shape") 
+acnh_data %>% summarize_all(function(x)sum(is.na(x)))  
+
+acnh_log<-glm(y ~ Sell + Seasonal_Avail + Style + Mannequin + Shape,data = acnh_data, family = binomial(link="logit"))
+
+exp(coeftest(acnh_log))
+
+table(acnh_data$y)
+prob <- predict(acnh_log,type="response")
+table(predict=as.numeric(prob>0.5), truth=acnh_data$y) %>% addmargins
+
+class_diag(prob,acnh_data$y)
+```
+
+A logistic regression model was used to predict whether the clothing item was a DIY from the rest of the variables. All the variables increases the odds of the clothing item being a DIY. 
+
+The accuracy of the model was 1, sensitivity was 1, specificity was 1, precision was 1, and AUC was 1. Therefore, it can be concluded that the model is perfect at predicting whether the clothing item is a DIY.
+
+```{R}
+set.seed(1234)
+k=10
+
+data1<-acnh_data[sample(nrow(acnh_data)),]
+folds<-cut(seq(1:nrow(acnh_data)),breaks=k,labels=F)
+diags<-NULL
+for(i in 1:k){
+ train<-data1[folds!=i,]
+ test<-data1[folds==i,]
+ truth<-test$y
+ fit<-glm(y~Sell + Seasonal_Avail + Style + Mannequin + Shape,data = train, family = binomial(link="logit"))
+ probs<-predict(fit,newdata = test,type="response")
+ diags<-rbind(diags,class_diag(probs,truth))
+}
+
+summarize_all(diags,mean)
+```
+
+A 10 fold CV was then performed with the model. The accuracy of the model was 0.997, specificity was 0.997, and AUC was 0.8938. Therefore, it can be concluded that the model is good at predicting whether the clothing item is a DIY. In addition, it can be concluded that the original logistic regression model was overfitting. 
+
+```{R}
+mat<-model.matrix(acnh_log)
+y<-as.matrix(acnh_data$y)
+x<-as.data.frame(mat) %>% dplyr::select(-1) %>% as.matrix
+cv<-cv.glmnet(x,y, family = "binomial")
+lasso<-glmnet(x,y, family = "binomial",lambda=cv$lambda.1se)
+
+coef(lasso)
+```
+
+Afterward, a LASSO was performed on the model. The variables that were retained were the selling price. 
+
+```{R}
+set.seed(1234)
+k=10 
+
+data1<-acnh_data[sample(nrow(acnh_data)),]
+folds<-cut(seq(1:nrow(acnh_data)),breaks=k,labels=F)
+diags<-NULL
+for(i in 1:k){
+ train<-data1[folds!=i,]
+ test<-data1[folds==i,]
+ truth<-test$y
+ fit<-glm(y~Sell,data = train, family = binomial(link="logit"))
+ probs<-predict(fit,newdata = test,type="response")
+ diags<-rbind(diags,class_diag(probs,truth))
+}
+
+summarize_all(diags,mean)
+
+```
+
+Another 10 fold CV was performed on the variables selected for by LASSO, selling price. The accuracy of the model was 0.986, specificity was 0.998, and AUC was 0.884. Therefore, it can be concluded that the model is good at predicting whether the clothing item is a DIY.
+
